@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS API for JavaScript Tutorials: Display a map</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+          padding: 0;
+          margin: 1%;
+          height: 100%;
+          width: 100%;
+        }
+
+        .esri-view .esri-popup__button.esri-popup__button--dock {
+            display: none;
+        }
+    </style>
+
+    <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
+      
+    <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.21/"></script>
+      
+    <!-- <script>
+        require(["esri/config","esri/Map", "esri/views/MapView"], function (esriConfig,Map, MapView) {
+            esriConfig.apiKey = "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30"
+            const map = new Map({
+            basemap: "arcgis-imagery" // Basemap layer service
+            });
+
+            const view = new MapView({
+                map: map,
+                center: [-118.805, 34.027], // Longitude, latitude
+                zoom: 13, // Zoom level
+                container: "viewDiv" // Div element
+            });
+        });
+    </script> -->
+
+    <script>
+
+        require([
+            "esri/config",
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/Graphic",
+            "esri/geometry/geometryEngine",
+            "esri/widgets/Search",
+            "esri/core/watchUtils"
+        ],
+        function (esriConfig, Map, MapView, Graphic, geometryEngine, Search, watchUtils) {
+
+            const authentication = new arcgisRest.ApiKey({
+                key: "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30"
+            });
+
+            esriConfig.apiKey = "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30";
+
+            const map = new Map({
+                basemap: "arcgis-navigation"
+            });
+
+            const view = new MapView({
+                map: map,
+                center: [9.1900, 45.4642], // Milan, Italy
+                zoom: 4,
+                container: "viewDiv",
+            });
+
+            const search = new Search({
+                view: view
+            });
+            view.ui.add(search, "top-right");
+
+            view.when(() => {
+                watchUtils.once(search, "activeSource", (loaded) => {
+                    if (loaded) {
+                        search.popupEnabled = false;
+                        search.activeSource.placeholder = "Find facts for cities or places";
+                    }
+                    getDemographicData("Milan", view.center)
+                });
+            });
+
+            search.on("select-result", (event) => {
+                if (!event.result){
+                    return;
+                }
+                getDemographicData(event.result.name, event.result.feature.geometry);
+            });
+
+            view.on("click", e => {
+                const params = {
+                    location: e.mapPoint,
+                    outFields: "*"
+                };
+                search.activeSource.locator.locationToAddress(params)
+
+                .then(function (response) { // Show the address found
+                    const city = response.attributes.City || response.attributes.Region;
+                    getDemographicData(city, params.location);
+                }, function (err) {
+                    view.graphics.removeAll();
+                    console.log("No address found.");
+                });
+            });
+
+            function getDemographicData(city, point) {
+                arcgisRest.queryDemographicData({
+                    studyAreas: [{
+                        "geometry": {
+                            "x": point.longitude,
+                            "y": point.latitude
+                        }
+                    }],
+                    authentication: authentication
+                })
+                .then((response) => {
+                    if (response.results[0].value.FeatureSet.length > 0 &&
+                      response.results[0].value.FeatureSet[0].features.length > 0) {
+                        const attributes = response.results[0].value.FeatureSet[0].features[0].attributes;
+                        showData(city, attributes, point);
+                    }
+                });
+            }
+
+            function showData(city, attributes, point) {
+                const title = `Global facts near ${city}`;
+                const content =
+                    `Population: ${attributes.TOTPOP}<br>Males: ${attributes.TOTMALES} <br>Females: ${attributes.TOTFEMALES}<br>Average Household Size: ${attributes.AVGHHSZ}`;
+
+                view.popup.open({
+                    location: point,
+                    title: title,
+                    content: content
+                });
+
+                const buffer = geometryEngine.geodesicBuffer(point, 1, "miles");
+                const graphicBuffer = new Graphic({
+                    geometry: buffer,
+                    symbol: {
+                        type: "simple-fill",
+                        color: [50, 50, 50, 0.1],
+                        outline: {
+                            color: [0, 0, 0, 0.25],
+                            width: .5
+                        }
+                    }
+                })
+                view.graphics.removeAll();
+                view.graphics.add(graphicBuffer);
+            }
+        });
+    </script>
+
+</head>
+<body>
+    <div id="viewDiv"></div>
+</body>
+</html>

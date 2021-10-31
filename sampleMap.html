@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,10 +11,10 @@
         html,
         body,
         #viewDiv {
-          padding: 0;
-          margin: 1%;
-          height: 100%;
-          width: 100%;
+            padding: 0;
+            margin: 1%;
+            height: 100%;
+            width: 100%;
         }
 
         .esri-view .esri-popup__button.esri-popup__button--dock {
@@ -24,144 +25,531 @@
     <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
-      
+
     <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.21/"></script>
-      
-    <!-- <script>
-        require(["esri/config","esri/Map", "esri/views/MapView"], function (esriConfig,Map, MapView) {
-            esriConfig.apiKey = "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30"
-            const map = new Map({
-            basemap: "arcgis-imagery" // Basemap layer service
-            });
-
-            const view = new MapView({
-                map: map,
-                center: [-118.805, 34.027], // Longitude, latitude
-                zoom: 13, // Zoom level
-                container: "viewDiv" // Div element
-            });
-        });
-    </script> -->
 
     <script>
-
-        require([
-            "esri/config",
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/Graphic",
-            "esri/geometry/geometryEngine",
-            "esri/widgets/Search",
-            "esri/core/watchUtils"
-        ],
-        function (esriConfig, Map, MapView, Graphic, geometryEngine, Search, watchUtils) {
-
-            const authentication = new arcgisRest.ApiKey({
-                key: "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30"
-            });
-
-            esriConfig.apiKey = "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30";
-
-            const map = new Map({
-                basemap: "arcgis-navigation"
-            });
-
-            const view = new MapView({
-                map: map,
-                center: [9.1900, 45.4642], // Milan, Italy
-                zoom: 4,
-                container: "viewDiv",
-            });
-
-            const search = new Search({
-                view: view
-            });
-            view.ui.add(search, "top-right");
-
-            view.when(() => {
-                watchUtils.once(search, "activeSource", (loaded) => {
-                    if (loaded) {
-                        search.popupEnabled = false;
-                        search.activeSource.placeholder = "Find facts for cities or places";
-                    }
-                    getDemographicData("Milan", view.center)
+        require(["esri/config", "esri/Map", "esri/views/MapView", "esri/Graphic", "esri/layers/GraphicsLayer"],
+            function (esriConfig, Map, MapView, Graphic, GraphicsLayer) {
+                esriConfig.apiKey =
+                    "AAPK9091fcfdb7144f5398c04bcb048b945ac4TodaqLNnpJZYVIZfaOmz5HQ24zuzIuNCgkSdN_-BrqZmp1hxzNZns_ySBPqZ30"
+                const map = new Map({
+                    basemap: "arcgis-topographic" // Basemap layer service
                 });
-            });
 
-            search.on("select-result", (event) => {
-                if (!event.result){
-                    return;
-                }
-                getDemographicData(event.result.name, event.result.feature.geometry);
-            });
+                const view = new MapView({
+                    map: map,
+                    center: [-111.78969, 43.82602], // Longitude, latitude
+                    zoom: 13, // Zoom level
+                    container: "viewDiv" // Div element
+                });
 
-            view.on("click", e => {
-                const params = {
-                    location: e.mapPoint,
-                    outFields: "*"
+                const graphicsLayer = new GraphicsLayer();
+                map.add(graphicsLayer);
+
+                const pointBoise = { //Create a point
+                    type: "point",
+                    longitude: -116.215019,
+                    latitude: 43.6150
                 };
-                search.activeSource.locator.locationToAddress(params)
 
-                .then(function (response) { // Show the address found
-                    const city = response.attributes.City || response.attributes.Region;
-                    getDemographicData(city, params.location);
-                }, function (err) {
-                    view.graphics.removeAll();
-                    console.log("No address found.");
+                const pointMeridian = { //Create a point
+                    type: "point",
+                    longitude: -116.393707,
+                    latitude: 43.612343
+                };
+
+                const pointNampa = { //Create a point
+                    type: "point",
+                    longitude: -116.560822,
+                    latitude: 43.565468
+                };
+
+                const pointIdahoFalls = { //Create a point
+                    type: "point",
+                    longitude: -112.033966,
+                    latitude: 43.491650
+                };
+
+                const pointCaldwell = { //Create a point
+                    type: "point",
+                    longitude: -116.687360,
+                    latitude: 43.662938
+                };
+
+                const pointPocatello = { //Create a point
+                    type: "point",
+                    longitude: -112.4455344,
+                    latitude: 42.8713032
+                };
+
+                const pointCoeurDAlene = { //Create a point
+                    type: "point",
+                    longitude: -116.780466,
+                    latitude: 47.677683
+                };
+
+                const pointTwinFalls = { //Create a point
+                    type: "point",
+                    longitude: -114.460503,
+                    latitude: 42.562786
+                };
+
+                const pointRexburg = { //Create a point
+                    type: "point",
+                    longitude: -111.78969,
+                    latitude: 43.82602
+                };
+
+                const pointPostFalls = { //Create a point
+                    type: "point",
+                    longitude: -116.948364,
+                    latitude: 47.712257
+                };
+
+                const pointLewiston = { //Create a point
+                    type: "point",
+                    longitude: -117.001189,
+                    latitude: 46.400409
+                };
+
+                const pointEagle = { //Create a point
+                    type: "point",
+                    longitude: -116.354012,
+                    latitude: 43.695442
+                };
+
+                const pointMoscow = { //Create a point
+                    type: "point",
+                    longitude: -116.999939,
+                    latitude: 46.731705
+                };
+
+                const pointKuna = { //Create a point
+                    type: "point",
+                    longitude: -116.418889,
+                    latitude: 43.493056
+                };
+
+                const pointAmmon = { //Create a point
+                    type: "point",
+                    longitude: -111.966635,
+                    latitude: 43.469637
+                };
+
+                const pointMountainHome = { //Create a point
+                    type: "point",
+                    longitude: -115.691197,
+                    latitude: 43.132950
+                };
+
+                const pointChubbuck = { //Create a point
+                    type: "point",
+                    longitude: -112.466091,
+                    latitude: 42.920748
+                };
+
+                const pointHayden = { //Create a point
+                    type: "point",
+                    longitude: -116.788889,
+                    latitude: 47.757222
+                };
+
+                const pointJerome = { //Create a point
+                    type: "point",
+                    longitude: -114.518653,
+                    latitude: 42.724073
+                };
+
+                const pointBlackfoot = { //Create a point
+                    type: "point",
+                    longitude: -112.344977,
+                    latitude: 43.190471
+                };
+
+                const pointGardenCity = { //Create a point
+                    type: "point",
+                    longitude: -116.238174,
+                    latitude: 43.622111
+                };
+
+                const pointBurley = { //Create a point
+                    type: "point",
+                    longitude: -113.792795,
+                    latitude: 42.535743
+                };
+
+                const pointStar = { //Create a point
+                    type: "point",
+                    longitude: -116.493462,
+                    latitude: 43.692108
+                };
+
+                // Names and crime rates for each city.
+                const infoBoise = {
+                    Name: "Boise",
+                    Description: "Crime Rate: \n Violent- 649 \n Property- 3653 \n per 1000 residents: \n Violent- 2.83 \n Property- 15.95" //18.78
+                }
+
+                const infoMeridian = {
+                    Name: "Meridian",
+                    Description: "Crime Rate: \n Violent- 177 \n Property- 1188 \n per 1000 residents: \n Violent- 1.55 \n Property- 10.41" // 11.86
+                }
+
+                const infoNampa = {
+                    Name: "Nampa",
+                    Description: "Crime Rate: \n Violent- 306 \n Property- 1767 \n per 1000 residents: \n Violent- 3.08 \n Property- 17.80" // 20.88
+                }
+
+                const infoIdahoFalls = {
+                    Name: "Idaho Falls",
+                    Description: "Crime Rate: \n Violent- 172 \n Property- 940 \n per 1000 residents: \n Violent- 2.74 \n Property- 14.95" // 17.69
+                }
+
+                const infoCaldwell = {
+                    Name: "Caldwell",
+                    Description: "Crime Rate: \n Violent- 203 \n Property- 997 \n per 1000 residents: \n Violent- 3.47 \n Property- 20.52" // 23.99
+                }
+
+                const infoPocatello = {
+                    Name: "Pocatello",
+                    Description: "Crime Rate: \n Violent- 269 \n Property- 1440 \n per 1000 residents: \n Violent- 4.75 \n Property- 25.43" // 30.18
+                }
+
+                const infoCoeurDAlene = {
+                    Name: "Coeur d`Alene",
+                    Description: "Crime Rate: \n Violent- 132 \n Property- 712 \n per 1000 residents: \n Violent- 2.52 \n Property- 13.58" // 16.10
+                }
+
+                const infoTwinFalls = {
+                    Name: "Twin Falls",
+                    Description: "Crime Rate: \n Violent- 201 \n Property- 1034 \n per 1000 residents: \n Violent- 4.00 \n Property- 24.60" // 28.60
+                }
+
+                const infoRexburg = {
+                    Name: "Rexburg",
+                    Description: "Crime Rate: \n Violent- 6 \n Property- 121 \n per 1000 residents: \n Violent- 0.20 \n Property- 4.12" // 4.32
+                }
+
+                const infoPostFalls = {
+                    Name: "Post Falls",
+                    Description: "Crime Rate: \n Violent- 68 \n Property- 585 \n per 1000 residents: \n Violent- 1.88 \n Property- 16.14" // 18.02
+                }
+
+                const infoLewiston = {
+                    Name: "Lewiston",
+                    Description: "Crime Rate: \n Violent- 42 \n Property- 955 \n per 1000 residents: \n Violent- 1.28 \n Property- 29.13" // 30.41
+                }
+
+                const infoEagle = {
+                    Name: "Eagle",
+                    Description: "Crime Rate: \n Violent- 43 \n Property- 114 \n per 1000 residents: \n Violent- 1.44 \n Property- 3.83" // 5.27
+                }
+
+                const infoMoscow = {
+                    Name: "Moscow",
+                    Description: "Crime Rate: \n Violent- 7 \n Property- 345 \n per 1000 residents: \n Violent- 0.27 \n Property- 13.42" // 13.69
+                }
+
+                const infoKuna = {
+                    Name: "Kuna",
+                    Description: "Crime Rate: \n Violent- 53 \n Property- 117 \n per 1000 residents: \n Violent- 2.38 \n Property- 5.26" // 7.64
+                }
+
+                const infoAmmon = {
+                    Name: "Ammon",
+                    Description: "Crime Rate: \n Violent- 35 \n Property- 198 \n per 1000 residents: \n Violent- 2.04 \n Property- 11.57" // 13.61
+                }
+
+                const infoMountainHome = {
+                    Name: "Mountain Home",
+                    Description: "Crime Rate: \n Violent- 54 \n Property- 229 \n per 1000 residents: \n Violent- 3.71 \n Property- 15.73" // 19.44
+                }
+
+                const infoChubbuck = {
+                    Name: "Chubbuck",
+                    Description: "Crime Rate: \n Violent- 47 \n Property- 584 \n per 1000 residents: \n Violent- 3.02 \n Property- 37.46" // 40.48
+                }
+
+                const infoHayden = {
+                    Name: "Hayden",
+                    Description: "Crime Rate: \n Violent- 42 \n Property- 225 \n per 1000 residents: \n Violent- 2.72 \n Property- 14.58" // 17.30
+                }
+
+                const infoJerome = {
+                    Name: "Jerome",
+                    Description: "Crime Rate: \n Violent- 42 \n Property- 157 \n per 1000 residents: \n Violent- 3.50 \n Property- 13.09" // 16.59
+                }
+
+                const infoBlackfoot = {
+                    Name: "Blackfoot",
+                    Description: "Crime Rate: \n Violent- 42 \n Property- 253 \n per 1000 residents: \n Violent- 3.49 \n Property- 21.02" // 24.51
+                }
+
+                const infoGardenCity = {
+                    Name: "Garden City",
+                    Description: "Crime Rate: \n Violent- 53 \n Property- 268 \n per 1000 residents: \n Violent- 4.43 \n Property- 22.39" // 26.82
+                }
+
+                const infoBurley = {
+                    Name: "Burley",
+                    Description: "Crime Rate: \n Violent- 16 \n Property- 137 \n per 1000 residents: \n Violent- 1.51 \n Property- 12.95" // 14.46
+                }
+
+                const infoStar = {
+                    Name: "Star",
+                    Description: "Crime Rate: \n Violent- ? \n Property- ? \n per 1000 residents: \n Violent- 0.93 \n Property- 6.51" // 7.44
+                }
+
+                // 0 - 8
+                const markerSymbolLightBlue = {
+                    type: "simple-marker",
+                    color: [146, 226, 242], // light blue
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                // 8 - 14
+                const markerSymbolBlue = {
+                    type: "simple-marker",
+                    color: [32, 42, 137], // Blue
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                // 14 - 22
+                const markerSymbolYellow = {
+                    type: "simple-marker",
+                    color: [216, 216, 59], // Yellow
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                // 22 - 28
+                const markerSymbolOrange = {
+                    type: "simple-marker",
+                    color: [204, 102, 10], // Orange
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                // 28+
+                const markerSymbolRed = {
+                    type: "simple-marker",
+                    color: [178, 12, 6], // Red
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                const popupTemplate = {
+                    title: "{Name}",
+                    content: "{Description}"
+                }
+                
+
+                const pointGraphicBoise = new Graphic({
+                    geometry: pointBoise,
+                    symbol: markerSymbolYellow,
+                    attributes: infoBoise,
+                    popupTemplate: popupTemplate
                 });
+                graphicsLayer.add(pointGraphicBoise);
+
+                const pointGraphicMeridian = new Graphic({
+                    geometry: pointMeridian,
+                    symbol: markerSymbolBlue,
+                    attributes: infoMeridian,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicMeridian);
+
+                const pointGraphicNampa = new Graphic({
+                    geometry: pointNampa,
+                    symbol: markerSymbolYellow,
+                    attributes: infoNampa,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicNampa);
+
+                const pointGraphicIdahoFalls = new Graphic({
+                    geometry: pointIdahoFalls,
+                    symbol: markerSymbolYellow,
+                    attributes: infoIdahoFalls,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicIdahoFalls);
+
+                const pointGraphicCaldwell = new Graphic({
+                    geometry: pointCaldwell,
+                    symbol: markerSymbolOrange,
+                    attributes: infoCaldwell,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicCaldwell);
+
+                const pointGraphicPocatello = new Graphic({
+                    geometry: pointPocatello,
+                    symbol: markerSymbolRed,
+                    attributes: infoPocatello,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicPocatello);
+
+                const pointGraphicCoeurDAlene = new Graphic({
+                    geometry: pointCoeurDAlene,
+                    symbol: markerSymbolYellow,
+                    attributes: infoCoeurDAlene,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicCoeurDAlene);
+
+                const pointGraphicTwinFalls = new Graphic({
+                    geometry: pointTwinFalls,
+                    symbol: markerSymbolRed,
+                    attributes: infoTwinFalls,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicTwinFalls);
+
+                const pointGraphicRexburg = new Graphic({
+                    geometry: pointRexburg,
+                    symbol: markerSymbolLightBlue,
+                    attributes: infoRexburg,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicRexburg);
+
+                const pointGraphicPostFalls = new Graphic({
+                    geometry: pointPostFalls,
+                    symbol: markerSymbolYellow,
+                    attributes: infoPostFalls,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicPostFalls);
+
+                const pointGraphicLewiston = new Graphic({
+                    geometry: pointLewiston,
+                    symbol: markerSymbolRed,
+                    attributes: infoLewiston,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicLewiston);
+
+                const pointGraphicEagle = new Graphic({
+                    geometry: pointEagle,
+                    symbol: markerSymbolLightBlue,
+                    attributes: infoEagle,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicEagle);
+
+                const pointGraphicMoscow = new Graphic({
+                    geometry: pointMoscow,
+                    symbol: markerSymbolBlue,
+                    attributes: infoMoscow,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicMoscow);
+
+                const pointGraphicKuna = new Graphic({
+                    geometry: pointKuna,
+                    symbol: markerSymbolLightBlue,
+                    attributes: infoKuna,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicKuna);
+
+                const pointGraphicAmmon = new Graphic({
+                    geometry: pointAmmon,
+                    symbol: markerSymbolBlue,
+                    attributes: infoAmmon,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicAmmon);
+
+                const pointGraphicMountainHome = new Graphic({
+                    geometry: pointMountainHome,
+                    symbol: markerSymbolYellow,
+                    attributes: infoMountainHome,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicMountainHome);
+
+                const pointGraphicChubbuck = new Graphic({
+                    geometry: pointChubbuck,
+                    symbol: markerSymbolRed,
+                    attributes: infoChubbuck,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicChubbuck);
+
+                const pointGraphicHayden = new Graphic({
+                    geometry: pointHayden,
+                    symbol: markerSymbolYellow,
+                    attributes: infoHayden,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicHayden);
+
+                const pointGraphicJerome = new Graphic({
+                    geometry: pointJerome,
+                    symbol: markerSymbolYellow,
+                    attributes: infoJerome,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicJerome);
+
+                const pointGraphicBlackfoot = new Graphic({
+                    geometry: pointBlackfoot,
+                    symbol: markerSymbolOrange,
+                    attributes: infoBlackfoot,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicBlackfoot);
+
+                const pointGraphicGardenCity = new Graphic({
+                    geometry: pointGardenCity,
+                    symbol: markerSymbolOrange,
+                    attributes: infoGardenCity,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicGardenCity);
+
+                const pointGraphicBurley = new Graphic({
+                    geometry: pointBurley,
+                    symbol: markerSymbolYellow,
+                    attributes: infoBurley,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicBurley);
+
+                const pointGraphicStar = new Graphic({
+                    geometry: pointStar,
+                    symbol: markerSymbolLightBlue,
+                    attributes: infoStar,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(pointGraphicStar);
+
+
             });
-
-            function getDemographicData(city, point) {
-                arcgisRest.queryDemographicData({
-                    studyAreas: [{
-                        "geometry": {
-                            "x": point.longitude,
-                            "y": point.latitude
-                        }
-                    }],
-                    authentication: authentication
-                })
-                .then((response) => {
-                    if (response.results[0].value.FeatureSet.length > 0 &&
-                      response.results[0].value.FeatureSet[0].features.length > 0) {
-                        const attributes = response.results[0].value.FeatureSet[0].features[0].attributes;
-                        showData(city, attributes, point);
-                    }
-                });
-            }
-
-            function showData(city, attributes, point) {
-                const title = `Global facts near ${city}`;
-                const content =
-                    `Population: ${attributes.TOTPOP}<br>Males: ${attributes.TOTMALES} <br>Females: ${attributes.TOTFEMALES}<br>Average Household Size: ${attributes.AVGHHSZ}`;
-
-                view.popup.open({
-                    location: point,
-                    title: title,
-                    content: content
-                });
-
-                const buffer = geometryEngine.geodesicBuffer(point, 1, "miles");
-                const graphicBuffer = new Graphic({
-                    geometry: buffer,
-                    symbol: {
-                        type: "simple-fill",
-                        color: [50, 50, 50, 0.1],
-                        outline: {
-                            color: [0, 0, 0, 0.25],
-                            width: .5
-                        }
-                    }
-                })
-                view.graphics.removeAll();
-                view.graphics.add(graphicBuffer);
-            }
-        });
     </script>
 
 </head>
+
 <body>
     <div id="viewDiv"></div>
 </body>
+
 </html>
